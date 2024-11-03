@@ -6,17 +6,17 @@ services:
       - .env
     build:
       context: .
+    entrypoint: /app/server-entrypoint.sh
     ports:
       - "8000:8000"
       
   nginx:
-    build: ./nginx
+    restart: always
+    image: nginx:1.23-alpine
     volumes:
       - static:/static
     ports:
       - "80:80"
-    depends_on:
-      - django_gunicorn
 
 volumes:
   static:
