@@ -3,40 +3,91 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.cache import cache
 from django.shortcuts import render
+from .models import RegistroRiego
+from django.db import models
 
 class GuardarDatos(APIView):
     def post(self, request):
-        # Obtener los datos de la solicitud POST
         datos_sensor = {
             "temperatura": request.data.get('temperatura'),
             "humedad_ambiente": request.data.get('humedad_ambiente'),
             "humedad_suelo": request.data.get('humedad_suelo'),
             "proximo_riego": request.data.get('proximo_riego'),
             "estado_sistema": request.data.get('estado_sistema'),
+            "estado_bomba": request.data.get('estado_bomba'),
+            "nivel_tanque_agua": request.data.get('nivel_tanque_agua'),
         }
 
-        # Guardar en caché por 1 hora (3600 segundos)
-        cache.set('datos_sensor', datos_sensor, timeout=3600)
+        cache.set('datos_sensor', datos_sensor, timeout=300)
 
         return Response({"message": "Datos guardados temporalmente"}, status=status.HTTP_201_CREATED)
 
-
 class ObtenerDatos(APIView):
     def get(self, request):
-        # Recuperar los datos de la caché
         datos_sensor = cache.get('datos_sensor')
 
+        total_agua_utilizada = RegistroRiego.objects.aggregate(total=models.Sum('cantidad_agua'))['total'] or 0
+
         if datos_sensor:
-            # Renderizar la plantilla HTML 'mostrar_datos.html' con los datos
+            datos_sensor['total_agua_utilizada'] = total_agua_utilizada
             return render(request, 'datos/mostrar_datos.html', datos_sensor)
         else:
-            # Si no hay datos en la caché, establecer valores por defecto
             datos_default = {
                 'temperatura': 'NA',
                 'humedad_ambiente': 'NA',
                 'humedad_suelo': 'NA',
                 'proximo_riego': 'NA',
-                'estado_sistema': 'NA'
+                'estado_sistema': 'NA',
+                'estado_bomba': 'NA',
+                'nivel_tanque_agua': 'NA',
+                'total_agua_utilizada': total_agua_utilizada
             }
-            # Renderizar la plantilla HTML 'mostrar_datos.html' con valores por defecto
             return render(request, 'datos/mostrar_datos.html', datos_default)
+
+class DatosCache(APIView):
+    def get(self, request):
+        datos_sensor = cache.get('datos_sensor')
+
+        total_agua_utilizada = RegistroRiego.objects.aggregate(total=models.Sum('cantidad_agua'))['total'] or 0
+
+        if datos_sensor:
+            datos_sensor['total_agua_utilizada'] = total_agua_utilizada
+            return Response(datos_sensor)
+        else:
+            datos_default = {
+                'temperatura': 'NA',
+                'humedad_ambiente': 'NA',
+                'humedad_suelo': 'NA',
+                'proximo_riego': 'NA',
+                'estado_sistema': 'NA',
+                'estado_bomba': 'NA',
+                'nivel_tanque_agua': 'NA',
+                'total_agua_utilizada': total_agua_utilizada
+            }
+            return Response(datos_default)
+
+
+class RegistrarAguaAPIView(APIView):
+    def post(self, request):
+        cantidad_agua = request.data.get('cantidad_agua')
+
+        if cantidad_agua is not None:
+            try:
+                cantidad_agua = float(cantidad_agua)    
+                if cantidad_agua > 0:
+                    nuevo_riego = RegistroRiego(cantidad_agua=cantidad_agua)
+                    nuevo_riego.save()
+
+                    return Response({"message": "Cantidad de agua registrada correctamente"}, status=status.HTTP_201_CREATED)
+                else:
+                    return Response({"error": "La cantidad de agua debe ser mayor a 0"}, status=status.HTTP_400_BAD_REQUEST)
+            except ValueError:
+                return Response({"error": "La cantidad de agua debe ser un número válido"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"error": "Falta el dato de cantidad de agua"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResetearAgua(APIView):
+    def post(self, request):
+        RegistroRiego.objects.all().delete()
+        return Response({"message": "El agua se ha restablecido correctamente."}, status=200)

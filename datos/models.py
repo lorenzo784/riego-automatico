@@ -1,3 +1,6 @@
 from django.db import models
+from django.utils import timezone
 
-# Create your models here.
+class RegistroRiego(models.Model):
+    cantidad_agua = models.FloatField()
+    fecha_hora = models.DateTimeField(default=timezone.now)

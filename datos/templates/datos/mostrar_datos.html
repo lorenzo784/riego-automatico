@@ -7,37 +7,56 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        // Función para actualizar los datos cada 5 segundos (5000 ms)
+        
         function actualizarDatos() {
             $.ajax({
-                url: '/api/actualizar-datos',
+                url: '/api/datos/',
                 type: 'GET',
                 success: function(data) {
-                    $('#temperatura').text(data.temperatura + " °C");
-                    $('#humedad_ambiente').text(data.humedad_ambiente + " %");
-                    $('#humedad_suelo').text(data.humedad_suelo + " %");
-                    $('#proximo_riego').text(data.proximo_riego);
-                    $('#estado_sistema').text(data.estado_sistema);
+                    if (data) {
+                        $('#temperatura').text(data.temperatura !== undefined ? data.temperatura + " °C" : "NA");
+                        $('#humedad_ambiente').text(data.humedad_ambiente !== undefined ? data.humedad_ambiente + " %" : "NA");
+                        $('#humedad_suelo').text(data.humedad_suelo !== undefined ? data.humedad_suelo + " %" : "NA");
+                        $('#proximo_riego').text(data.proximo_riego !== undefined ? data.proximo_riego : "NA");
+                        $('#estado_sistema').text(data.estado_sistema !== undefined ? data.estado_sistema : "NA");
+                        $('#total_agua_utilizada').text(data.total_agua_utilizada !== undefined ? data.total_agua_utilizada + " litros" : "0 litros");
+                    } else {
+                        console.error("La respuesta de la API es undefined.");
+                        alert("No se pudieron obtener datos del sistema.");
+                    }
                 },
                 error: function(error) {
                     console.log("Error al obtener los datos:", error);
+                    alert("Hubo un error al obtener los datos. Por favor, inténtalo de nuevo.");
                 }
             });
         }
 
-        // Llamar a la función actualizarDatos al cargar la página y luego cada 5 segundos
         $(document).ready(function() {
             actualizarDatos();
             setInterval(actualizarDatos, 5000);
         });
-    </script>
+    
+        function resetearAgua() {
+            $.ajax({
+                url: '/api/resetear-agua/',
+                type: 'POST',
+                success: function(data) {
+                    console.log("Agua restablecida correctamente", data);
+                },
+                error: function(error) {
+                    console.log("Error al resetear el agua:", error);
+                }
+            });
+        }
+    </script>    
 </head>
 <body class="bg-green-100">
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold text-center text-green-800 mb-6">Estado Actual del Sistema de Riego</h1>
 
         <div class="flex justify-center mb-6">
-            <img src="https://png.pngtree.com/png-clipart/20231002/original/pngtree-cute-cartoon-cactus-vector-illustration-cacti-cartoon-botany-vector-png-image_12942184.png" alt="Planta" class="w-32 h-32 rounded-full shadow-md"> <!-- Cambia la URL por la imagen de una planta -->
+            <img src="https://png.pngtree.com/png-clipart/20231002/original/pngtree-cute-cartoon-cactus-vector-illustration-cacti-cartoon-botany-vector-png-image_12942184.png" alt="Planta" class="w-32 h-32 rounded-full shadow-md">
         </div>
 
         <div class="bg-white shadow-md rounded-lg p-6">
@@ -46,6 +65,11 @@
             <p class="text-lg text-gray-700"><strong>Humedad del suelo:</strong> <span id="humedad_suelo" class="font-semibold text-green-600">{{ humedad_suelo }} %</span></p>
             <p class="text-lg text-gray-700"><strong>Próximo riego a las:</strong> <span id="proximo_riego" class="font-semibold text-green-600">{{ proximo_riego }}</span></p>
             <p class="text-lg text-gray-700"><strong>Estado del sistema:</strong> <span id="estado_sistema" class="font-semibold text-green-600">{{ estado_sistema }}</span></p>
+            <p class="text-lg text-gray-700"><strong>Total agua utilizada:</strong> <span id="total_agua_utilizada" class="font-semibold text-green-600">{{ total_agua_utilizada }} litros</span></p>
+        </div>
+
+        <div class="mt-6 text-center">
+            <button onclick="resetearAgua()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Resetear Consumo de Agua</button>
         </div>
     </div>
 </body>
