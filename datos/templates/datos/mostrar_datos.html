@@ -22,12 +22,10 @@
                         $('#total_agua_utilizada').text(data.total_agua_utilizada !== undefined ? data.total_agua_utilizada + " litros" : "0 litros");
                     } else {
                         console.error("La respuesta de la API es undefined.");
-                        alert("No se pudieron obtener datos del sistema.");
                     }
                 },
                 error: function(error) {
                     console.log("Error al obtener los datos:", error);
-                    alert("Hubo un error al obtener los datos. Por favor, inténtalo de nuevo.");
                 }
             });
         }
