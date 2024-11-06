@@ -91,3 +91,8 @@ class ResetearAgua(APIView):
     def post(self, request):
         RegistroRiego.objects.all().delete()
         return Response({"message": "El agua se ha restablecido correctamente."}, status=200)
+    
+
+class bomba(APIView):
+    def get(self, request):
+        return render(request, 'datos/estado_bomba.html')
