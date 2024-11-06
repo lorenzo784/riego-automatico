@@ -6,32 +6,30 @@
     <title>Control de Bomba</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        var bombaEncendida = false;
+
         function toggleMode() {
             var modeButton = document.getElementById("modeButton");
             var modeStatus = document.getElementById("modeStatus");
             var horariosContainer = document.getElementById("horariosContainer");
             var formularioContainer = document.getElementById("formularioContainer");
 
-            // Cambiar entre modo manual y automático
             if (modeStatus.innerText === "Manual") {
                 modeStatus.innerText = "Automático";
                 modeButton.innerText = "Cambiar a Manual";
                 modeButton.classList.remove("bg-green-500");
                 modeButton.classList.add("bg-red-500");
 
-                // Mostrar los horarios si existen
                 var horariosExistentes = getHorariosExistentes();
                 if (horariosExistentes.length > 0) {
-                    // Mostrar horarios
                     horariosContainer.innerHTML = "<h3 class='text-xl font-bold mb-4'>Horarios de Riego:</h3>";
                     horariosExistentes.forEach(function(horario) {
                         horariosContainer.innerHTML += "<p>Hora: " + horario + "</p>";
                     });
-                    horariosContainer.innerHTML += '<button onclick="cambiarHorarios()" class="mt-4 bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">Cambiar Horarios</button>';
+                    horariosContainer.innerHTML += '<button onclick="cambiarHorarios()" class="mt-4 bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg">Cambiar Horarios</button>';
                     horariosContainer.style.display = 'block';
                     formularioContainer.style.display = 'none';
                 } else {
-                    // Mostrar formulario para configurar horarios
                     horariosContainer.style.display = 'none';
                     formularioContainer.style.display = 'block';
                 }
@@ -41,19 +39,15 @@
                 modeButton.classList.remove("bg-red-500");
                 modeButton.classList.add("bg-green-500");
 
-                // Ocultar horarios y formulario del modo automático
                 horariosContainer.style.display = 'none';
                 formularioContainer.style.display = 'none';
             }
         }
 
-        // Función para simular la obtención de horarios existentes
         function getHorariosExistentes() {
-            // Simulamos que tenemos 2 horarios predefinidos
             return ["08:00", "14:00"];
         }
 
-        // Mostrar el formulario para cambiar horarios
         function cambiarHorarios() {
             var horariosExistentes = getHorariosExistentes();
             var vecesAlDia = horariosExistentes.length;
@@ -65,7 +59,6 @@
                 document.getElementById("horario" + (index + 1)).value = horario;
             });
 
-            // Mostrar formulario con los horarios actuales
             document.getElementById("horariosContainer").style.display = 'none';
             document.getElementById("formularioContainer").style.display = 'block';
         }
@@ -74,7 +67,6 @@
             var vecesAlDia = document.getElementById("vecesAlDia").value;
             var humedadSuelo = document.getElementById("humedadSuelo").value;
 
-            // Validación para asegurarse de que los valores no sean negativos ni 0
             if (vecesAlDia <= 0) {
                 alert("La cantidad de veces al día debe ser mayor que 0.");
                 return;
@@ -89,13 +81,11 @@
                 horarios.push(document.getElementById("horario" + (i + 1)).value);
             }
 
-            // Validar si el número de horarios ingresados coincide con la cantidad de veces al día
             if (horarios.length != vecesAlDia) {
                 alert("El número de horarios ingresados no coincide con la cantidad de veces al día.");
                 return;
             }
 
-            // Aquí puedes enviar los datos al servidor con AJAX o formularios tradicionales
             alert("Horarios guardados: " + horarios.join(", ") + " con humedad del suelo: " + humedadSuelo);
         }
 
@@ -108,59 +98,101 @@
                 horariosInputs.innerHTML += `
                     <div class="mb-4">
                         <label for="horario${i}" class="block text-lg">Hora de riego ${i}:</label>
-                        <input type="time" id="horario${i}" class="border-2 border-gray-300 p-2 rounded w-40" required>
+                        <input type="time" id="horario${i}" class="border-2 border-gray-300 p-2 rounded-lg w-40" required>
                     </div>
                 `;
             }
         }
+
+        function regresar() {
+            var horariosContainer = document.getElementById("horariosContainer");
+            var formularioContainer = document.getElementById("formularioContainer");
+
+            if (horariosContainer.style.display === 'block') {
+                horariosContainer.style.display = 'none';
+                formularioContainer.style.display = 'none';
+            } else {
+                horariosContainer.style.display = 'none';
+                formularioContainer.style.display = 'none';
+            }
+        }
+
+        function toggleBomba() {
+            var encenderButton = document.getElementById("encenderBomba");
+            var apagarButton = document.getElementById("apagarBomba");
+
+            if (!bombaEncendida) {
+                bombaEncendida = true;
+                encenderButton.classList.remove("bg-gray-500", "hover:bg-gray-700");
+                encenderButton.classList.add("bg-green-500", "hover:bg-green-700");
+                apagarButton.classList.remove("bg-red-500", "hover:bg-red-700");
+                apagarButton.classList.add("bg-gray-500", "hover:bg-gray-700");
+            } else {
+                bombaEncendida = false;
+                encenderButton.classList.remove("bg-green-500", "hover:bg-green-700");
+                encenderButton.classList.add("bg-gray-500", "hover:bg-gray-700");
+                apagarButton.classList.remove("bg-gray-500", "hover:bg-gray-700");
+                apagarButton.classList.add("bg-red-500", "hover:bg-red-700");
+            }
+        }
     </script>
 </head>
-<body class="flex items-center justify-center h-screen bg-gray-100">
+<body class="bg-gradient-to-b from-green-100 to-green-300 min-h-screen flex items-center justify-center p-4">
 
-    <div class="text-center">
-        <h1 class="text-2xl font-bold mb-6">Control de la Bomba de Agua</h1>
+    <div class="max-w-4xl w-full bg-white rounded-lg shadow-xl p-6">
+        <div class="text-center text-gray-700">
+            <h1 class="text-3xl font-bold mb-8">Control de la Bomba de Agua</h1>
 
-        <a href="/encender-bomba" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4 block">
-            Encender Bomba
-        </a>
+            <div class="mb-4">
+                <button id="encenderBomba" onclick="toggleBomba()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
+                    Encender Bomba
+                </button>
+            </div>
 
-        <a href="/apagar-bomba" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded block mb-4">
-            Apagar Bomba
-        </a>
+            <div class="mb-4">
+                <button id="apagarBomba" onclick="toggleBomba()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
+                    Apagar Bomba
+                </button>
+            </div>
 
-        <div class="mt-6">
-            <h2 class="text-lg font-semibold mb-2">Modo Actual: <span id="modeStatus" class="text-xl font-bold text-blue-600">Manual</span></h2>
-            <button id="modeButton" onclick="toggleMode()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                Cambiar a Automático
+            <div class="mt-6">
+                <h2 class="text-lg font-semibold mb-4">Modo Actual: <span id="modeStatus" class="text-xl font-bold text-blue-500">Manual</span></h2>
+                <button id="modeButton" onclick="toggleMode()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
+                    Cambiar a Automático
+                </button>
+            </div>
+
+            <div id="horariosContainer" class="mt-6 hidden">
+            </div>
+
+            <div id="formularioContainer" class="mt-6 hidden">
+                <h3 class="text-xl font-bold mb-4">Configurar Horarios de Riego</h3>
+
+                <div class="mb-4">
+                    <label for="vecesAlDia" class="block text-lg">Cantidad de veces al día:</label>
+                    <input type="number" id="vecesAlDia" name="vecesAlDia" class="border-2 border-gray-300 p-2 rounded-lg w-20" min="1" required>
+                </div>
+
+                <div id="horariosInputs"></div>
+
+                <div class="mb-4">
+                    <label for="humedadSuelo" class="block text-lg">Humedad del suelo (%):</label>
+                    <input type="number" id="humedadSuelo" name="humedadSuelo" class="border-2 border-gray-300 p-2 rounded-lg w-20" min="1" required>
+                </div>
+
+                <button onclick="generarInputsHorarios()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg mb-4 transition-all duration-300 transform hover:scale-105">Generar Horarios</button>
+
+                <button onclick="guardarHorarios()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105">
+                    Guardar Horarios
+                </button>
+            </div>
+
+            <button onclick="regresar()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg mt-4 transition-all duration-300 transform hover:scale-105">
+                Regresar
             </button>
-        </div>
-
-        <!-- Contenedor para mostrar los horarios existentes -->
-        <div id="horariosContainer" class="mt-6 hidden">
-            <!-- Los horarios se mostrarán aquí si existen -->
-        </div>
-
-        <!-- Formulario para ingresar nuevos horarios -->
-        <div id="formularioContainer" class="mt-6 hidden">
-            <h3 class="text-xl font-bold mb-4">Configurar Horarios de Riego</h3>
-
-            <div class="mb-4">
-                <label for="vecesAlDia" class="block text-lg">Cantidad de veces al día:</label>
-                <input type="number" id="vecesAlDia" name="vecesAlDia" class="border-2 border-gray-300 p-2 rounded w-20" min="1" required>
-            </div>
-
-            <div id="horariosInputs"></div>
-
-            <div class="mb-4">
-                <label for="humedadSuelo" class="block text-lg">Humedad del suelo (%):</label>
-                <input type="number" id="humedadSuelo" name="humedadSuelo" class="border-2 border-gray-300 p-2 rounded w-20" min="1" required>
-            </div>
-
-            <button onclick="generarInputsHorarios()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4">Generar Horarios</button>
-
-            <button onclick="guardarHorarios()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Guardar Horarios</button>
         </div>
     </div>
 
 </body>
 </html>
+

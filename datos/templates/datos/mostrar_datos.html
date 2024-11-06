@@ -6,6 +6,7 @@
     <title>Proyecto Final: Sistema de Riego</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
         .planta {
             position: relative;
@@ -21,17 +22,6 @@
             background-color: rgba(0, 150, 255, 0.7);
             border-radius: 50%;
             animation: caerGota 1s forwards;
-        }
-
-        @keyframes caerGota {
-            0% {
-                top: -20px;
-                opacity: 1;
-            }
-            100% {
-                top: 80px;
-                opacity: 0;
-            }
         }
     </style>
     <script>
@@ -97,9 +87,6 @@
             <h2 class="text-2xl font-semibold text-green-700">Proyecto Final: Sistema de Riego</h2>
             <p class="text-gray-600 mt-2">Arquitectura de Computadoras y Ensambladores 1</p>
             <p class="text-gray-600">Ing. Edwin Macz</p>
-            <a href="{% url 'estado_bomba' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Estado del riego
-            </a>
         </div>
 
         <h1 class="text-4xl font-bold text-center text-green-800 mb-8">Estado Actual del Sistema de Riego</h1>
@@ -118,7 +105,11 @@
             <p class="text-lg text-gray-800"><strong>⚙️ Estado del sistema:</strong> <span id="estado_sistema" class="font-semibold text-green-700">{{ estado_sistema }}</span></p>
             <p class="text-lg text-gray-800"><strong>💧 Total agua utilizada:</strong> <span id="total_agua_utilizada" class="font-semibold text-green-700">{{ total_agua_utilizada }} litros</span></p>
         </div>
-
+        <div class="mt-6 text-center">
+            <a href="{% url 'estado_bomba' %}" class="bg-green-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-green-700 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50">
+                Control de Riego
+            </a>
+        </div>
         <div class="mt-8 text-center">
             <button onclick="resetearAgua()" class="bg-red-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-red-700 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50">
                 Resetear Consumo de Agua
