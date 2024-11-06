@@ -5,45 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Bomba</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        var bombaEncendida = false;
+    var bombaEncendida = false;
 
-        function toggleMode() {
-            var modeButton = document.getElementById("modeButton");
-            var modeStatus = document.getElementById("modeStatus");
-            var horariosContainer = document.getElementById("horariosContainer");
-            var formularioContainer = document.getElementById("formularioContainer");
+// Función para obtener el estado de la bomba desde el servidor
+function obtenerEstadoBomba() {
+    $.ajax({
+        url: '/control-bomba/',  // Ruta de la API
+        method: 'GET',
+        success: function(response) {
+            // Actualizar el estado de la bomba en la interfaz
+            $('#estado').text(response.estado_bomba ? 'Activada' : 'Desactivada');
+            bombaEncendida = response.estado_bomba;
 
-            if (modeStatus.innerText === "Manual") {
-                modeStatus.innerText = "Automático";
-                modeButton.innerText = "Cambiar a Manual";
-                modeButton.classList.remove("bg-green-500");
-                modeButton.classList.add("bg-red-500");
-
-                var horariosExistentes = getHorariosExistentes();
-                if (horariosExistentes.length > 0) {
-                    horariosContainer.innerHTML = "<h3 class='text-xl font-bold mb-4'>Horarios de Riego:</h3>";
-                    horariosExistentes.forEach(function(horario) {
-                        horariosContainer.innerHTML += "<p>Hora: " + horario + "</p>";
-                    });
-                    horariosContainer.innerHTML += '<button onclick="cambiarHorarios()" class="mt-4 bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg">Cambiar Horarios</button>';
-                    horariosContainer.style.display = 'block';
-                    formularioContainer.style.display = 'none';
-                } else {
-                    horariosContainer.style.display = 'none';
-                    formularioContainer.style.display = 'block';
-                }
+            // Actualizar los botones según el estado
+            if (bombaEncendida) {
+                $('#encenderBomba').addClass("bg-green-500 hover:bg-green-700");
+                $('#apagarBomba').removeClass("bg-red-500 hover:bg-red-700").addClass("bg-gray-500 hover:bg-gray-700");
             } else {
-                modeStatus.innerText = "Manual";
-                modeButton.innerText = "Cambiar a Automático";
-                modeButton.classList.remove("bg-red-500");
-                modeButton.classList.add("bg-green-500");
-
-                horariosContainer.style.display = 'none';
-                formularioContainer.style.display = 'none';
+                $('#apagarBomba').addClass("bg-red-500 hover:bg-red-700");
+                $('#encenderBomba').removeClass("bg-green-500 hover:bg-green-700").addClass("bg-gray-500 hover:bg-gray-700");
             }
+        },
+        error: function(error) {
+            console.error('Error al obtener el estado de la bomba:', error);
         }
+    });
+}
 
+// Función para cambiar el estado de la bomba (activar/desactivar)
+function cambiarEstado(estado) {
+    console.log('Enviando estado de la bomba:', estado);  // Verificar el valor enviado
+    $.ajax({
+        url: '/control-bomba/',  // Ruta de la API
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            "estado_bomba": estado.toString()  // Aquí se asegura que el valor sea una cadena
+        }),
+        success: function(response) {
+            console.log('Respuesta del servidor:', response);  // Verifica la respuesta del servidor
+            // Después de cambiar el estado, actualizar la interfaz
+            $('#estado').text(response.estado_bomba ? 'true' : 'false');
+        },
+        error: function(error) {
+            console.error('Error al cambiar el estado de la bomba:', error);
+        }
+    });
+}
+
+// Función para alternar el estado de la bomba (encender o apagar)
+function toggleBomba() {
+    // Cambiar el estado de la bomba
+    var nuevoEstado = !bombaEncendida;
+    
+    // Llamar a la función para cambiar el estado en el servidor
+    cambiarEstado(nuevoEstado);
+
+    // Actualizar la interfaz localmente
+    if (nuevoEstado) {
+        $('#encenderBomba').removeClass("bg-gray-500").addClass("bg-green-500");
+        $('#apagarBomba').removeClass("bg-red-500").addClass("bg-gray-500");
+    } else {
+        $('#apagarBomba').removeClass("bg-gray-500").addClass("bg-red-500");
+        $('#encenderBomba').removeClass("bg-green-500").addClass("bg-gray-500");
+    }
+}
+
+// Cargar el estado de la bomba cuando la página cargue
+$(document).ready(function() {
+    obtenerEstadoBomba();  // Obtener el estado inicial
+});
         function getHorariosExistentes() {
             return ["08:00", "14:00"];
         }

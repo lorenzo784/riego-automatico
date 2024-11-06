@@ -5,6 +5,7 @@ from django.core.cache import cache
 from django.shortcuts import render
 from .models import RegistroRiego
 from django.db import models
+import json
 
 class GuardarDatos(APIView):
     def post(self, request):
@@ -96,3 +97,31 @@ class ResetearAgua(APIView):
 class bomba(APIView):
     def get(self, request):
         return render(request, 'datos/estado_bomba.html')
+
+
+
+class ControlBombaAPIView(APIView):
+
+    def get(self, request):
+        estado_bomba = cache.get('estado_bomba')
+
+        if estado_bomba is None:
+            estado_bomba = False
+            cache.set('estado_bomba', estado_bomba, timeout=60*10) 
+
+        return Response({"estado_bomba": estado_bomba}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        estado_bomba = request.data.get('estado_bomba')
+
+        if estado_bomba is None:
+            return Response({"error": "El valor de 'estado_bomba' es necesario."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if estado_bomba == 'true':
+            cache.set('estado_bomba', True, timeout=60*10) 
+            return Response({"estado_bomba": True}, status=status.HTTP_200_OK)
+        elif estado_bomba == 'false':
+            cache.set('estado_bomba', False, timeout=60*10)
+            return Response({"estado_bomba": False}, status=status.HTTP_200_OK)
+
+        return Response({"error": "El valor de 'estado_bomba' debe ser 'true' o 'false'"}, status=status.HTTP_400_BAD_REQUEST)

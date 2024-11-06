@@ -36,6 +36,7 @@
                         $('#humedad_suelo').hide().text(data.humedad_suelo !== undefined ? data.humedad_suelo + " %" : "NA").fadeIn();
                         $('#proximo_riego').hide().text(data.proximo_riego !== undefined ? data.proximo_riego : "NA").fadeIn();
                         $('#estado_sistema').hide().text(data.estado_sistema !== undefined ? data.estado_sistema : "NA").fadeIn();
+                        $('#nivel_tanque_agua').hide().text(data.nivel_tanque_agua !== undefined ? data.nivel_tanque_agua : "NA").fadeIn();
                         $('#total_agua_utilizada').hide().text(data.total_agua_utilizada !== undefined ? data.total_agua_utilizada + " litros" : "0 litros").fadeIn();
                     } else {
                         console.error("La respuesta de la API es undefined.");
@@ -103,13 +104,14 @@
             <p class="text-lg text-gray-800"><strong>🌱 Humedad del suelo:</strong> <span id="humedad_suelo" class="font-semibold text-green-700">{{ humedad_suelo }} %</span></p>
             <p class="text-lg text-gray-800"><strong>🕒 Próximo riego a las:</strong> <span id="proximo_riego" class="font-semibold text-green-700">{{ proximo_riego }}</span></p>
             <p class="text-lg text-gray-800"><strong>⚙️ Estado del sistema:</strong> <span id="estado_sistema" class="font-semibold text-green-700">{{ estado_sistema }}</span></p>
+            <p class="text-lg text-gray-800"><strong>💧 Nivel de agua:</strong> <span id="nivel_tanque_agua" class="font-semibold text-green-700">{{ nivel_tanque_agua }} %</span></p>
             <p class="text-lg text-gray-800"><strong>💧 Total agua utilizada:</strong> <span id="total_agua_utilizada" class="font-semibold text-green-700">{{ total_agua_utilizada }} litros</span></p>
         </div>
-        <div class="mt-6 text-center">
+        <!-- <div class="mt-6 text-center">
             <a href="{% url 'estado_bomba' %}" class="bg-green-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-green-700 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-50">
                 Control de Riego
             </a>
-        </div>
+        </div> -->
         <div class="mt-8 text-center">
             <button onclick="resetearAgua()" class="bg-red-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-red-700 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50">
                 Resetear Consumo de Agua
