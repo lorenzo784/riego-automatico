@@ -3,23 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datos del Sistema de Riego</title>
+    <title>Proyecto Final: Sistema de Riego</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .planta {
+            position: relative;
+            display: inline-block;
+        }
+
+        .gota {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background-color: rgba(0, 150, 255, 0.7);
+            border-radius: 50%;
+            animation: caerGota 1s forwards;
+        }
+
+        @keyframes caerGota {
+            0% {
+                top: -20px;
+                opacity: 1;
+            }
+            100% {
+                top: 80px;
+                opacity: 0;
+            }
+        }
+    </style>
     <script>
-        
         function actualizarDatos() {
             $.ajax({
                 url: '/api/datos/',
                 type: 'GET',
                 success: function(data) {
                     if (data) {
-                        $('#temperatura').text(data.temperatura !== undefined ? data.temperatura + " °C" : "NA");
-                        $('#humedad_ambiente').text(data.humedad_ambiente !== undefined ? data.humedad_ambiente + " %" : "NA");
-                        $('#humedad_suelo').text(data.humedad_suelo !== undefined ? data.humedad_suelo + " %" : "NA");
-                        $('#proximo_riego').text(data.proximo_riego !== undefined ? data.proximo_riego : "NA");
-                        $('#estado_sistema').text(data.estado_sistema !== undefined ? data.estado_sistema : "NA");
-                        $('#total_agua_utilizada').text(data.total_agua_utilizada !== undefined ? data.total_agua_utilizada + " litros" : "0 litros");
+                        $('#temperatura').hide().text(data.temperatura !== undefined ? data.temperatura + " °C" : "NA").fadeIn();
+                        $('#humedad_ambiente').hide().text(data.humedad_ambiente !== undefined ? data.humedad_ambiente + " %" : "NA").fadeIn();
+                        $('#humedad_suelo').hide().text(data.humedad_suelo !== undefined ? data.humedad_suelo + " %" : "NA").fadeIn();
+                        $('#proximo_riego').hide().text(data.proximo_riego !== undefined ? data.proximo_riego : "NA").fadeIn();
+                        $('#estado_sistema').hide().text(data.estado_sistema !== undefined ? data.estado_sistema : "NA").fadeIn();
+                        $('#total_agua_utilizada').hide().text(data.total_agua_utilizada !== undefined ? data.total_agua_utilizada + " litros" : "0 litros").fadeIn();
                     } else {
                         console.error("La respuesta de la API es undefined.");
                     }
@@ -34,40 +61,65 @@
             actualizarDatos();
             setInterval(actualizarDatos, 5000);
         });
-    
+
         function resetearAgua() {
             $.ajax({
                 url: '/api/resetear-agua/',
                 type: 'POST',
                 success: function(data) {
                     console.log("Agua restablecida correctamente", data);
+                    crearGotas();
                 },
                 error: function(error) {
                     console.log("Error al resetear el agua:", error);
                 }
             });
         }
-    </script>    
+
+        function crearGotas() {
+            for (let i = 0; i < 5; i++) {
+                setTimeout(function() {
+                    let gota = $('<div class="gota"></div>');
+                    $('#planta').append(gota);
+                    setTimeout(function() {
+                        gota.remove();
+                    }, 1000);
+                }, i * 300);
+            }
+        }
+    </script>
 </head>
-<body class="bg-green-100">
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold text-center text-green-800 mb-6">Estado Actual del Sistema de Riego</h1>
+<body class="bg-gradient-to-b from-green-100 to-green-300 min-h-screen flex items-center justify-center p-4">
+
+    <div class="container max-w-lg mx-auto px-6 py-10 bg-white rounded-lg shadow-xl border-t-8 border-green-600">
+
+        <div class="text-center mb-8">
+            <h2 class="text-2xl font-semibold text-green-700">Proyecto Final: Sistema de Riego</h2>
+            <p class="text-gray-600 mt-2">Arquitectura de Computadoras y Ensambladores 1</p>
+            <p class="text-gray-600">Ing. Edwin Macz</p>
+        </div>
+
+        <h1 class="text-4xl font-bold text-center text-green-800 mb-8">Estado Actual del Sistema de Riego</h1>
 
         <div class="flex justify-center mb-6">
-            <img src="https://png.pngtree.com/png-clipart/20231002/original/pngtree-cute-cartoon-cactus-vector-illustration-cacti-cartoon-botany-vector-png-image_12942184.png" alt="Planta" class="w-32 h-32 rounded-full shadow-md">
+            <div id="planta" class="planta">
+                <img src="https://png.pngtree.com/png-clipart/20231002/original/pngtree-cute-cartoon-cactus-vector-illustration-cacti-cartoon-botany-vector-png-image_12942184.png" alt="Planta" class="w-32 h-32 rounded-full border-4 border-green-600 shadow-lg transition duration-300 transform hover:scale-105">
+            </div>
         </div>
 
-        <div class="bg-white shadow-md rounded-lg p-6">
-            <p class="text-lg text-gray-700"><strong>Temperatura del ambiente:</strong> <span id="temperatura" class="font-semibold text-green-600">{{ temperatura }} °C</span></p>
-            <p class="text-lg text-gray-700"><strong>Humedad del ambiente:</strong> <span id="humedad_ambiente" class="font-semibold text-green-600">{{ humedad_ambiente }} %</span></p>
-            <p class="text-lg text-gray-700"><strong>Humedad del suelo:</strong> <span id="humedad_suelo" class="font-semibold text-green-600">{{ humedad_suelo }} %</span></p>
-            <p class="text-lg text-gray-700"><strong>Próximo riego a las:</strong> <span id="proximo_riego" class="font-semibold text-green-600">{{ proximo_riego }}</span></p>
-            <p class="text-lg text-gray-700"><strong>Estado del sistema:</strong> <span id="estado_sistema" class="font-semibold text-green-600">{{ estado_sistema }}</span></p>
-            <p class="text-lg text-gray-700"><strong>Total agua utilizada:</strong> <span id="total_agua_utilizada" class="font-semibold text-green-600">{{ total_agua_utilizada }} litros</span></p>
+        <div class="bg-green-50 border-l-4 border-green-500 rounded-lg p-6 space-y-4 shadow-lg transition duration-300 ease-in-out hover:shadow-xl">
+            <p class="text-lg text-gray-800"><strong>🌡️ Temperatura del ambiente:</strong> <span id="temperatura" class="font-semibold text-green-700">{{ temperatura }} °C</span></p>
+            <p class="text-lg text-gray-800"><strong>💧 Humedad del ambiente:</strong> <span id="humedad_ambiente" class="font-semibold text-green-700">{{ humedad_ambiente }} %</span></p>
+            <p class="text-lg text-gray-800"><strong>🌱 Humedad del suelo:</strong> <span id="humedad_suelo" class="font-semibold text-green-700">{{ humedad_suelo }} %</span></p>
+            <p class="text-lg text-gray-800"><strong>🕒 Próximo riego a las:</strong> <span id="proximo_riego" class="font-semibold text-green-700">{{ proximo_riego }}</span></p>
+            <p class="text-lg text-gray-800"><strong>⚙️ Estado del sistema:</strong> <span id="estado_sistema" class="font-semibold text-green-700">{{ estado_sistema }}</span></p>
+            <p class="text-lg text-gray-800"><strong>💧 Total agua utilizada:</strong> <span id="total_agua_utilizada" class="font-semibold text-green-700">{{ total_agua_utilizada }} litros</span></p>
         </div>
 
-        <div class="mt-6 text-center">
-            <button onclick="resetearAgua()" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Resetear Consumo de Agua</button>
+        <div class="mt-8 text-center">
+            <button onclick="resetearAgua()" class="bg-red-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-red-700 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50">
+                Resetear Consumo de Agua
+            </button>
         </div>
     </div>
 </body>
