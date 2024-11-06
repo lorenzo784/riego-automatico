@@ -37,7 +37,7 @@
     <script>
         function actualizarDatos() {
             $.ajax({
-                url: '/api/datos/',
+                url: '/datos/',
                 type: 'GET',
                 success: function(data) {
                     if (data) {
@@ -64,7 +64,7 @@
 
         function resetearAgua() {
             $.ajax({
-                url: '/api/resetear-agua/',
+                url: '/resetear-agua/',
                 type: 'POST',
                 success: function(data) {
                     console.log("Agua restablecida correctamente", data);
